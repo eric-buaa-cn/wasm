@@ -7,10 +7,6 @@
         WebAssembly.instantiateStreaming(fetch("json.wasm"), go.importObject).then((result) => {
             go.run(result.instance);
         });
-
-        WebAssembly.instantiateStreaming(fetch("add.wasm")).then((module) => {
-            console.log(module.instance.exports.add(1, 2)); // "3"
-        });
     </script>
 </head>
 <body>

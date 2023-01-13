@@ -4,5 +4,5 @@
 brew install emscripten
 
 # convert c to wasm
-emcc math.cpp --bind -sWASM=1 -o math.js
+emcc math.cpp --bind -s MODULARIZE -s EXPORT_NAME=MathModule -o math.js
 ```

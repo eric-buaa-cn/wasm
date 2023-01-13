@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <title>wasm-c</title>
     <script type="text/javascript">
-        let MathModule;
-        WebAssembly.instantiateStreaming(fetch("math.wasm")).then((module) => {
-            MathModule = module.instance.exports;
-            const sum = MathModule.add(1, 2);
+        WebAssembly.instantiateStreaming(fetch("math.wasm")).then((obj) => {
+            let math = obj.instance.exports;
+            const sum = math.add(1, 2);
             console.log("1 + 2 = " + sum);
 
-            const sub = MathModule.sub(1, 2);
+            const sub = math.sub(1, 2);
             console.log("1 - 2 = " + sub);
         })
     </script>

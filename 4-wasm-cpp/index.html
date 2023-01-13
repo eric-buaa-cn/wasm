@@ -5,9 +5,9 @@
     <title>wasm-cpp</title>
     <script type="text/javascript" src="math.js"></script>
     <script type="text/javascript">
-        MathModule({}).then((module) => {
-            console.log("1 + 2 = " + module.add(1, 2));
-            console.log("1 - 2 = " + module.sub(1, 2));
+        MathModule({}).then((math) => {
+            console.log("1 + 2 = " + math.add(1, 2));
+            console.log("1 - 2 = " + math.sub(1, 2));
         })
     </script>
 </head>
