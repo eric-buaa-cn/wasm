@@ -1,0 +1,83 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <script src="wasm_exec.js"></script>
+    <script>
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("json.wasm"), go.importObject).then((result) => {
+            go.run(result.instance);
+        });
+
+        WebAssembly.instantiateStreaming(fetch("add.wasm")).then((module) => {
+            console.log(module.instance.exports.add(1, 2)); // "3"
+        });
+    </script>
+</head>
+<body>
+    <textarea id="jsonInput" name="jsonInput" cols="80" rows="20"></textarea>
+    <input id="formatButton" type="submit" name="formatButton" value="format json" onclick="json(jsonInput.value)"/>
+    <textarea id="jsonOutput" name="jsonOutput" cols="80" rows="20"></textarea>
+    <h1 id="tips" name="tips"></h1>
+
+    <br/>
+    <input id="number" type="text" name="number" value="0"></input>
+    <input id="jsFib" type="button" value="jsFib" onclick="OnJSClick(number.value)"/>
+    <h1 id="jsFibResult"></h1>
+    <input id="wasmFib" type="button" value="wasmFib" onclick="OnWasmClick(number.value)"/>
+    <h1 id="wasmFibResult"></h1>
+</body>
+<script type="text/javascript">
+    function fibonacci(num){
+        var a = 1, b = 0, temp;
+
+        while (num >= 0){
+            temp = a;
+            a = a + b;
+            b = temp;
+            num--;
+        }
+
+        return b;
+    }
+
+    function fibonacciJS(num){
+        if (num == 0) return 0;
+        if (num == 1) return 1;
+
+        return fibonacciJS(num - 1) + fibonacciJS(num - 2);
+    }
+
+    function OnWasmClick(number) {
+        console.log(number);
+        let start = Date.now();
+        let fib = fibonacciWasm(number);
+        let stop = Date.now();
+        console.log(fib);
+        const tips = document.getElementById("wasmFibResult");
+        tips.innerText = (stop - start) + " ms used, result: " + fib["value"];
+    }
+
+    function OnJSClick(number) {
+        let start = Date.now();
+        let fib = fibonacciJS(number);
+        let stop = Date.now();
+        const tips = document.getElementById("jsFibResult");
+        tips.innerText = (stop - start) + " ms used, result: " + fib;
+    }
+
+</script>
+<script type="text/javascript">
+    const json = function(input) {
+        const tips = document.getElementById("tips");
+        const result = formatJSON(input);
+
+        if ((result != null) && !("error" in result)) {
+            jsonOutput.value = result["value"];
+            tips.innerText = "";
+        } else {
+            jsonOutput.value = "";
+            tips.innerText = result["error"];
+        }
+    };
+</script>
+</html>
