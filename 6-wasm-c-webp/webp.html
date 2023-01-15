@@ -1,81 +1,82 @@
 <html>
-    <head>
-        <title>webp</title>
-        <script src="./webp.js"></script>
-        <script type="text/javascript">
-            let api;
-            Module.onRuntimeInitialized = async () => {
-                api = {
-                    version: Module.cwrap("version", "number", []),
-                    create_buffer: Module.cwrap("create_buffer", "number", ["number", "number"]),
-                    destroy_buffer: Module.cwrap("destroy_buffer", "", ["number"]),
-                    get_result_ptr: Module.cwrap("get_result_ptr", "number", []),
-                    get_result_size: Module.cwrap("get_result_size", "number", []),
-                    free_result: Module.cwrap("free_result", "", ["number"]),
-                    encode: Module.cwrap("encode", "", ["number", "number", "number", "number"]),
-
-                };
-                console.log(api.version());
-            };
-        </script>
-    </head>
-
-    <body>
-        <input id="load" type="file" accept="image/*">
-        <input id="trans" type="button" value="Translate to WebP format">
-        <br/>
-    </body>
-
+<head>
+    <title>webp</title>
+    <script src="./webp.js"></script>
     <script type="text/javascript">
-        const loadButton = document.getElementById('load');
-        loadButton.addEventListener('change', function (e) {
-            if (e.target.files.length > 0) {
-                const img = document.createElement("img");
-                g_blob = e.target.files[0];
-                img.src = URL.createObjectURL(g_blob);
-                img.alt = e.target.files[0];
-                document.body.appendChild(img);
+        createWebPModule({}).then(module => {
+            const webPModule = module;
+            const webPWasmAPI = {
+                version: webPModule.cwrap("version", "number", []),
+                createBuffer: webPModule.cwrap("create_buffer", "number", ["number", "number"]),
+                destroyBuffer: webPModule.cwrap("destroy_buffer", "", ["number"]),
+                getResultPointer: webPModule.cwrap("get_result_ptr", "number", []),
+                getResultSize: webPModule.cwrap("get_result_size", "number", []),
+                freeResult: webPModule.cwrap("free_result", "", ["number"]),
+                encode: webPModule.cwrap("encode", "", ["number", "number", "number", "number"]),
+            };
+
+            let g_blob;
+
+            const loadButton = document.getElementById('load');
+            loadButton.addEventListener('change', function (e) {
+                if (e.target.files.length > 0) {
+                    g_blob = e.target.files[0];
+
+                    const blobURL = URL.createObjectURL(g_blob);
+                    const description = e.target.name;
+                    appendImageToBody(blobURL, description);
+                }
+            });
+
+            const transButton = document.getElementById('trans');
+            transButton.addEventListener('click', translateX);
+
+            async function blob2Data(blob) {
+                // Load image
+                const img = await createImageBitmap(blob);
+                // Make canvas same size as image
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                // Draw image onto canvas
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                return ctx.getImageData(0, 0, img.width, img.height);
+            }
+
+            async function translateX() {
+                if (!g_blob) return;
+
+                const image = await blob2Data(g_blob);
+                const ptr = webPWasmAPI.createBuffer(image.width, image.height);
+
+                webPModule.HEAP8.set(image.data, ptr);
+                webPWasmAPI.encode(ptr, image.width, image.height, 100);
+                webPWasmAPI.destroyBuffer(ptr);
+                const resultPointer = webPWasmAPI.getResultPointer();
+                const resultSize = webPWasmAPI.getResultSize();
+                const resultView = new Uint8Array(webPModule.HEAP8.buffer, resultPointer, resultSize);
+                const result = new Uint8Array(resultView);
+                webPWasmAPI.freeResult(resultPointer);
+
+                const blob = new Blob([result], {type: "image/webp"});
+                const blobURL = URL.createObjectURL(blob);
+                appendImageToBody(blobURL, "webp image");
             }
         });
 
-        const transButton = document.getElementById('trans');
-        transButton.addEventListener('click', translateX);
-
-        let g_blob;
-        async function blob2Data(blob) {
-            // Load image
-            const img = await createImageBitmap(blob);
-            // Make canvas same size as image
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            // Draw image onto canvas
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-            return ctx.getImageData(0, 0, img.width, img.height);
-        }
-
-        async function translateX() {
-            const image = await blob2Data(g_blob);
-            //const image = await loadImage('images/sky.jpg');
-            const ptr = api.create_buffer(image.width, image.height);
-
-            Module.HEAP8.set(image.data, ptr);
-            api.encode(ptr, image.width, image.height, 100);
-            const result_ptr = api.get_result_ptr();
-            const result_size = api.get_result_size();
-            const result_view = new Uint8Array(Module.HEAP8.buffer, result_ptr, result_size);
-            const result = new Uint8Array(result_view);
-            api.free_result(result_ptr);
-
-            const blob = new Blob([result], {type: "image/webp"});
-            const blobURL = URL.createObjectURL(blob);
+        function appendImageToBody(url, description) {
             const img = document.createElement("img");
-            img.src = blobURL;
-            img.alt = "a useful description";
+            img.src = url;
+            img.alt = description;
             document.body.appendChild(img);
-
-            api.destroy_buffer(ptr);
         }
     </script>
+</head>
+
+<body>
+    <input id="load" type="file" accept="image/*">
+    <input id="trans" type="button" value="Translate to WebP format">
+    <br/>
+</body>
 </html>

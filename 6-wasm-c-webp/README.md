@@ -10,7 +10,7 @@ git clone https://github.com/webmproject/libwebp
 
 Compile the wrapper webp.c and code from WebP project to get webp.js and webp.wasm.
 ```shell
-emcc -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_RUNTIME_METHODS='["cwrap"]' -I libwebp webp.c libwebp/src/{dec,dsp,demux,enc,mux,utils}/*.c libwebp/sharpyuv/*.c -o webp.js
+emcc -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -sMODULARIZE -s 'EXPORT_NAME="createWebPModule"' -s EXPORTED_RUNTIME_METHODS='["cwrap"]' -I libwebp webp.c libwebp/src/{dec,dsp,demux,enc,mux,utils}/*.c libwebp/sharpyuv/*.c -o webp.js
 ```
 
 3. Access
