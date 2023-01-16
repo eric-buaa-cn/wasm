@@ -1,0 +1,22 @@
+<script type="text/javascript">
+    const memory = new WebAssembly.Memory({initial: 1});
+
+    const printStr = function (offset, length) {
+        const bytes = new Uint8Array(memory.buffer, offset, length);
+        const str = new TextDecoder("utf8").decode(bytes);
+        console.log(str);
+    };
+
+    let importObj = {
+        js: {
+            print: printStr,
+            mem: memory,
+        }
+    };
+
+    fetch("helloWorld.wasm").then(response => response.arrayBuffer())
+        .then(buffer => WebAssembly.instantiate(buffer, importObj))
+        .then(module => {
+            module.instance.exports.hello();
+        });
+</script>
