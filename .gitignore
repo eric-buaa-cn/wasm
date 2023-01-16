@@ -1,0 +1,5 @@
+.DS_Store
+.idea/
+6-wasm-c-webp/libwebp/
+6-wasm-c-webp/webp.js
+6-wasm-c-webp/webp.wasm
