@@ -1,0 +1,7 @@
+<script type="text/javascript">
+    fetch("answer.wasm").then(response => response.arrayBuffer())
+    .then(buffer => WebAssembly.instantiate(buffer))
+    .then(module => {
+        console.log(module.instance.exports.answer());
+    });
+</script>
