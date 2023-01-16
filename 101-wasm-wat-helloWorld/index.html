@@ -14,9 +14,6 @@
         }
     };
 
-    fetch("helloWorld.wasm").then(response => response.arrayBuffer())
-        .then(buffer => WebAssembly.instantiate(buffer, importObj))
-        .then(module => {
-            module.instance.exports.hello();
-        });
+    WebAssembly.instantiateStreaming(fetch("helloWorld.wasm"), importObj)
+    .then(result => result.instance.exports.hello());
 </script>
