@@ -1,0 +1,2 @@
+```shell
+emcc glad.cpp main.cpp glslprogram/glslprogram.cpp -std=c++11 -s WASM=1 -s USE_GLFW=3 -s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s MODULARIZE -s EXPORT_ES6 -s EXPORT_NAME=createModule -O3 -o index.js -I . -I /usr/local/Cellar/glm/0.9.9.8/include -I glslprogram -I glad  --preload-file draw_with_shader.vs --preload-file draw_with_shader.fs -Wno-macro-redefined
