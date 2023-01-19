@@ -9,13 +9,13 @@
 <body>
 <canvas id="canvas"></canvas>
 </body>
-<script src="index.js"></script>
-<script type='text/javascript'>
+<script type="module">
+    import createModule from './index.js';
+
     const canvas = document.querySelector('#canvas');
     canvas.addEventListener('contextmenu', function (e) {
         e.preventDefault();
     });
-
     createModule({canvas: canvas}).then(module => {
         canvas.addEventListener('click', module._toggle_background_color, false);
     });
